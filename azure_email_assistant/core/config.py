@@ -7,10 +7,10 @@ from dataclasses import dataclass
 @dataclass
 class AzureConfig:
     """Azure OpenAI API configuration."""
-    endpoint: str = "https://bek-openai-dev.openai.azure.com/"
-    api_key: str = "your-api-key-here"
+    endpoint: str = "https://andras018923456332.services.ai.azure.com/models"
+    api_key: str = "FCU89qWazU9ZkYGmtC3g41e1EKNFsbtkiOULeWahSW4lQ84xsbP1JQQJ99BBACYeBjFXJ3w3AAAAACOGlZgA"  # Replace with your actual API key
     api_version: str = "2024-08-01-preview"
-    deployment: str = "gpt-4o-mini"
+    deployment: str = "DeepSeek-R1"
     temperature: float = 0.1
     max_tokens: int = 4096
     top_p: float = 0.9
