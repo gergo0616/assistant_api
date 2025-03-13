@@ -69,8 +69,7 @@ class BaseAssistant(ABC):
     def _format_messages(self, email: EmailContent) -> List[Dict[str, str]]:
         """Format email content into messages for the API."""
         system_message = (
-            "You are an AI assistant that helps respond to emails. "
-            "Provide a professional and helpful response to the email."
+            "You will receive an email subject and a body. As an assistant, you can reply using only what you have in the documents. Write a professional and precise reply based on the subject and body of the email. Begin by greeting the sender appropriately, considering the tone and context of their original message. Do not refer to the document where you found the answer. If the information is unavailable in the documents, reply that you cannot help with that, and an agent will get back to the user soon; again, do not say that the information is not available in the documents. Add the <br> tag when a line breaks; it will help me to format the output. Conclude the email with a standard signature that includes the following information: Name: Joy and Company: Technogiate."
         )
         
         user_message = (
@@ -134,7 +133,7 @@ class AzureAssistant(BaseAssistant):
                 request_url,
                 headers=headers,
                 json=payload,
-                timeout=30
+                timeout=60
             )
             
             # Check for successful response
