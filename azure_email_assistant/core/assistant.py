@@ -145,9 +145,12 @@ class AzureAssistant(BaseAssistant):
             # Extract assistant message
             assistant_message = response_data["choices"][0]["message"]["content"]
             
+            # Clean the response to remove thinking section
+            cleaned_response = self._clean_response(assistant_message)
+            
             return AssistantResponse(
                 status="success",
-                response_text=assistant_message
+                response_text=cleaned_response
             )
             
         except requests.exceptions.RequestException as e:
@@ -164,6 +167,36 @@ class AzureAssistant(BaseAssistant):
             error_message = f"Unexpected error: {str(e)}"
             logger.error(error_message)
             return AssistantResponse(status="error", error=error_message)
+
+    def _clean_response(self, response: str) -> str:
+        """Remove thinking section from response.
+        
+        Args:
+            response: Raw response from Azure OpenAI
+            
+        Returns:
+            Cleaned response with thinking section removed
+        """
+        # Look for patterns that indicate the end of thinking section
+        patterns = [
+            '\n\n\n',  # Triple newline often separates thinking from response
+            'Dear ',   # Email usually starts with "Dear"
+            'Subject:' # Or starts with Subject line
+        ]
+        
+        for pattern in patterns:
+            if pattern in response:
+                # Find the position of the pattern
+                pos = response.find(pattern)
+                if pattern != 'Dear ' and pattern != 'Subject:':
+                    # For patterns like triple newline, skip the pattern itself
+                    return response[pos + len(pattern):]
+                else:
+                    # For patterns like "Dear" or "Subject:", include them in the result
+                    return response[pos:]
+        
+        # If no pattern is found, return the original response
+        return response
 
 
 class MockAssistant(BaseAssistant):
