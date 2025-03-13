@@ -177,49 +177,53 @@ class AzureAssistant(BaseAssistant):
         Returns:
             Cleaned response with thinking section removed
         """
-        # Look for patterns that indicate the end of thinking section
-        patterns = [
-            '\n\n\n',  # Triple newline often separates thinking from response
-            'Dear ',   # Email usually starts with "Dear"
-            'Subject:' # Or starts with Subject line
+        # Check if the response has a clear thinking section followed by actual content
+        if '<think>' in response and '</think>' in response:
+            # Extract content after the closing think tag
+            think_end = response.find('</think>') + len('</think>')
+            # Return everything after the closing think tag, removing any leading whitespace or newlines
+            return response[think_end:].lstrip()
+        
+        # Look for common patterns that indicate the transition from thinking to response
+        transition_markers = [
+            # Hungarian greetings
+            'Kedves ',
+            'Tisztelt ',
+            # English greetings
+            'Dear ',
+            'Hello ',
+            'Hi ',
+            # Email formatting
+            'Subject:',
+            # Multiple newlines often separate thinking from response
+            '\n\n\n'
         ]
         
-        for pattern in patterns:
-            if pattern in response:
-                # Find the position of the pattern
-                pos = response.find(pattern)
-                if pattern != 'Dear ' and pattern != 'Subject:':
-                    # For patterns like triple newline, skip the pattern itself
-                    return response[pos + len(pattern):]
-                else:
-                    # For patterns like "Dear" or "Subject:", include them in the result
-                    return response[pos:]
+        # Find the earliest occurrence of any transition marker
+        earliest_pos = len(response)
+        earliest_marker = None
         
-        # If no pattern is found, return the original response
+        for marker in transition_markers:
+            pos = response.find(marker)
+            if pos != -1 and pos < earliest_pos:
+                earliest_pos = pos
+                earliest_marker = marker
+        
+        # If we found a marker, extract everything from that point
+        if earliest_marker:
+            # For greetings and subject lines, include the marker
+            if earliest_marker in ['Kedves ', 'Tisztelt ', 'Dear ', 'Hello ', 'Hi ', 'Subject:']:
+                return response[earliest_pos:].strip()
+            # For newlines, skip the marker
+            else:
+                return response[earliest_pos + len(earliest_marker):].strip()
+        
+        # If no clear transition is found, try to find the last paragraph
+        # This is a fallback for cases where the thinking isn't clearly separated
+        paragraphs = response.split('\n\n')
+        if len(paragraphs) > 1:
+            # Return the last few paragraphs (likely the actual response)
+            return '\n\n'.join(paragraphs[-2:]).strip()
+        
+        # If all else fails, return the original response
         return response
-
-
-class MockAssistant(BaseAssistant):
-    """Mock assistant for testing."""
-    
-    def process_email(self, email: EmailContent) -> AssistantResponse:
-        """
-        Process an email and generate a mock response.
-        
-        Args:
-            email: Email content to process
-            
-        Returns:
-            AssistantResponse with a mock response
-        """
-        # Generate a simple mock response
-        mock_response = (
-            f"Thank you for your email regarding '{email.subject}'.\n\n"
-            f"I have received your message and will get back to you shortly.\n\n"
-            f"Best regards,\nAI Assistant"
-        )
-        
-        return AssistantResponse(
-            status="success",
-            response_text=mock_response
-        )
