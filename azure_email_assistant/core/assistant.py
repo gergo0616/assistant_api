@@ -133,7 +133,7 @@ class AzureAssistant(BaseAssistant):
                 request_url,
                 headers=headers,
                 json=payload,
-                timeout=60
+                timeout=180
             )
             
             # Check for successful response
