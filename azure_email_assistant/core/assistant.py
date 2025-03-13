@@ -227,3 +227,29 @@ class AzureAssistant(BaseAssistant):
         
         # If all else fails, return the original response
         return response
+
+
+class MockAssistant(BaseAssistant):
+    """Mock assistant for testing."""
+    
+    def process_email(self, email: EmailContent) -> AssistantResponse:
+        """
+        Process an email and generate a mock response.
+        
+        Args:
+            email: Email content to process
+            
+        Returns:
+            AssistantResponse with a mock response
+        """
+        # Generate a simple mock response
+        mock_response = (
+            f"Thank you for your email regarding '{email.subject}'.\n\n"
+            f"I have received your message and will get back to you shortly.\n\n"
+            f"Best regards,\nAI Assistant"
+        )
+        
+        return AssistantResponse(
+            status="success",
+            response_text=mock_response
+        )
